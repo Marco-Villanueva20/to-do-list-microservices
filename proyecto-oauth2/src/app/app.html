@@ -1,0 +1,66 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      <i class="bi bi-check2-square me-2"></i> ToDo List
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <ng-container *ngIf="!userName">
+            <button class="btn btn-outline-light me-2" (click)="login()">
+              <i class="bi bi-box-arrow-in-right"></i> Login
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="userName">
+            <span class="navbar-text me-3 text-white">
+              <i class="bi bi-person-circle me-1"></i> Bienvenido, **{{ userName }}**
+            </span>
+            <button class="btn btn-danger" (click)="logout()">
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+          </ng-container>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+      <h1 class="display-5 fw-bold text-primary">Bienvenido a la ToDo List App</h1>
+      <p class="col-md-8 fs-4">
+        Esta es tu plataforma segura y privada para gestionar todas tus tareas pendientes.
+        Utilizamos **OAuth 2.0 y OpenID Connect** para garantizar que solo tú puedas acceder a tus datos.
+      </p>
+
+      <ng-container *ngIf="!userName">
+        <p class="lead">
+          Inicia sesión para comenzar a crear tu primera tarea.
+        </p>
+        <button class="btn btn-primary btn-lg" (click)="login()">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión Ahora
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="userName">
+        <p class="lead text-success">
+          ¡Ya estás autenticado! Haz clic abajo para ver tus tareas.
+        </p>
+        <button class="btn btn-success btn-lg" (click)="goToTasks()">
+          <i class="bi bi-list-check"></i> Ir a Mis Tareas
+        </button>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <router-outlet />
+</div>

@@ -1,0 +1,52 @@
+<div class="container mt-4">
+
+  <h2 class="mb-4 text-center">📋 Lista de Tareas</h2>
+
+  <!-- mensaje de estado -->
+  <div *ngIf="mensaje" class="alert alert-info text-center">
+    {{ mensaje }}
+  </div>
+
+  <!-- si no hay tareas -->
+  <div *ngIf="todos.length === 0" class="alert alert-warning text-center">
+    No hay tareas registradas.
+  </div>
+ <button class="btn btn-success btn-lg" (click)="goToIndex()">
+          <i class="bi bi-list-check"></i> Ir a La Bienvenida
+  </button>
+  <!-- tabla de tareas -->
+  <div *ngIf="todos.length > 0" class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-dark text-center">
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Descripción</th>
+          <th>Completado</th>
+          <th>Creado</th>
+          <th>Actualizado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let todo of todos">
+          <td>{{ todo.id }}</td>
+          <td>{{ todo.title }}</td>
+          <td>{{ todo.description }}</td>
+          <td class="text-center">
+            <span
+              class="badge"
+              [ngClass]="{
+                'bg-success': todo.completed,
+                'bg-danger': !todo.completed
+              }">
+              {{ todo.completed ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td>{{ todo.createdAt | date:'short' }}</td>
+          <td>{{ todo.updatedAt | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
