@@ -21,7 +21,7 @@ public class OAuth2FeignClientConf {
      * Configura el administrador de clientes autorizados de OAuth2.
      * Este se encarga de gestionar el token del cliente Feign usando Client Credentials.
      */
-	@Bean
+	/*@Bean
 	OAuth2AuthorizedClientManager authorizedClientManager(
 		ClientRegistrationRepository clientRegistrationRepository, OAuth2AuthorizedClientService authorizedClientService) {
 		
@@ -41,6 +41,7 @@ public class OAuth2FeignClientConf {
      * Interceptor Feign que añade el token de acceso OAuth2 en cada request.
      * Así Feign podrá comunicarse con otros microservicios protegidos.
     */
+	/*
 	@Bean
 	RequestInterceptor feignOAuth2RequestInterceptor(OAuth2AuthorizedClientManager authorizedClientManager) {
 		return requestTamplate->{
@@ -62,5 +63,5 @@ public class OAuth2FeignClientConf {
 			// Añadimos el token en la cabecera Authorization
 			requestTamplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 		};
-	}	 
+	}	 */
 }

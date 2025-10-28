@@ -12,38 +12,34 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
-	
-	
-	 @Bean
-	    CorsConfigurationSource corsConfigurationSource() {
-	        CorsConfiguration config = new CorsConfiguration();
-	        config.setAllowCredentials(true);
-	        config.setAllowedOrigins(List.of("http://localhost:4200"));
-	        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-	        config.setAllowedHeaders(List.of("*"));
-	        config.setExposedHeaders(List.of("Authorization"));
 
-	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	        source.registerCorsConfiguration("/**", config);
-	        return source;
-	    }
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowCredentials(true);
+		config.setAllowedOrigins(List.of("http://localhost:4200"));
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		config.setAllowedHeaders(List.of("*"));
+		config.setExposedHeaders(List.of("Authorization"));
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
 
 	@Bean
 	SecurityWebFilterChain filterChain(ServerHttpSecurity http) throws Exception {
-	    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-	    .csrf(ServerHttpSecurity.CsrfSpec::disable)
-	    
-	    .authorizeExchange(authorize -> 
-	    authorize.anyExchange().authenticated()
-	        )
-	        .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
-	    //opcional mas confuso pero conciso .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt) lo mismo
-	    return http.build();
+		http
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.csrf(ServerHttpSecurity.CsrfSpec::disable)
+				.authorizeExchange(authorize -> authorize
+						.pathMatchers("/user-service/api/user/register", "/api/user/register").permitAll()
+						.anyExchange().authenticated())
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+		return http.build();
 	}
-    
-   
+
 }

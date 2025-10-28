@@ -1,0 +1,137 @@
+services:
+  # 1. BASE DE DATOS (mysql_db) - Añadido Healthcheck
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: tododb
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - microservices
+    healthcheck: # <-- AÑADIDO: Verifica que MySQL esté listo para conexiones
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. SERVIDOR DE CONFIGURACIÓN (config-server) - Añadido Healthcheck y ajustada dependencia
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo
+    # Si config-server realmente necesita la DB, debe esperar a que esté saludable.
+    # Si no la necesita, este bloque debería omitirse. Asumo que la necesita para ser cautelosos.
+    depends_on:
+      mysql_db:
+        condition: service_healthy # Espera a que la DB esté lista antes de cargar la configuración
+    networks:
+      - microservices
+    healthcheck: # <-- AÑADIDO: Verifica que el servidor de configuración esté respondiendo
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 3. SERVIDOR OAUTH2 (oauth2-server) - Ajustadas ambas dependencias a healthy
+  oauth2-server:
+    build: ./oauth2-server
+    container_name: oauth2-server
+    ports:
+      - "9000:9000"
+    depends_on:
+      mysql_db:
+        condition: service_healthy # <-- CLAVE: Resuelve el "Communications link failure"
+      config-server:
+        condition: service_healthy # <-- AÑADIDO: Debe esperar al Config Server
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888 # <-- Asumo que necesita el Config Server
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_db:3306/tododb
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+    networks:
+      - microservices
+
+  # 4. SERVIDOR EUREKA (eureka-server) - Ajustada dependencia a healthy
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      config-server:
+        condition: service_healthy # Espera a que el Config Server esté listo para cargar su configuración
+    networks:
+      - microservices
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+
+  # 5. API GATEWAY (api-gateway) - Ajustadas dependencias
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-server:
+        condition: service_healthy # Espera al Config Server
+      eureka-server:
+        condition: service_started # No es tan crítico que Eureka esté healthy, solo corriendo
+    networks:
+      - microservices
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+
+  # 6. USER SERVICE (user-service) - Ajustadas dependencias
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    depends_on:
+      mysql_db:
+        condition: service_healthy # Espera a la DB
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy # Espera al Config Server
+    networks:
+      - microservices
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_db:3306/tododb
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+
+  # 7. TO-DO SERVICE (to-do-service) - Ajustadas dependencias
+  to-do-service:
+    build: ./to-do-service
+    container_name: to-do-service
+    depends_on:
+      mysql_db:
+        condition: service_healthy # Espera a la DB
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy # Espera al Config Server
+    networks:
+      - microservices
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_db:3306/tododb
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+
+volumes:
+  db_data:
+
+networks:
+  microservices:
+    driver: bridge

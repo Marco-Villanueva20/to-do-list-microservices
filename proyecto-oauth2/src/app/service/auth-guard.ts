@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 
 export const authGuard: CanActivateFn = (route, state) => {
-   const oauthService = inject(OAuthService);
+  const oauthService = inject(OAuthService);
   const router = inject(Router);
 
   // 1. Verificar si el usuario tiene un token válido
