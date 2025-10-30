@@ -55,7 +55,38 @@ to-do-microservicio/
 
 ## 🚀 Puesta en Marcha
 
-### Prerrequisitos
+### Opción 1: Despliegue con Docker (Recomendado)
+
+El proyecto incluye configuración completa con Docker Compose para facilitar el despliegue.
+
+#### Prerrequisitos
+- **Docker** y **Docker Compose** instalados
+
+#### Inicio con Docker
+1. Desde la raíz del proyecto, ejecuta:
+```bash
+docker-compose up --build
+```
+Esto iniciará todos los servicios automáticamente:
+- MySQL Database (puerto 3307)
+- Config Server (puerto 8888)
+- OAuth2 Server (puerto 9000)
+- Eureka Server (puerto 8761)
+- API Gateway (puerto 8080)
+- User Service (puerto dinámico)
+- ToDo Service (puerto dinámico)
+- Frontend Angular (puerto 4200, requiere inicio manual)
+
+2. Para el frontend, en una terminal separada:
+```bash
+cd proyecto-oauth2
+npm install
+ng serve
+```
+
+### Opción 2: Inicio Manual
+
+#### Prerrequisitos
 
 - **Java 17** o superior
 - **Maven 3.6+**
