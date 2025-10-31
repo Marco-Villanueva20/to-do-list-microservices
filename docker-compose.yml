@@ -20,6 +20,21 @@ services:
       timeout: 5s
       retries: 5
 
+  redis_db:
+    image: redis:8-alpine
+    container_name: redis_db
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   # Config Server (config-server)
   config-server:
     build: ./config-server
@@ -93,6 +108,8 @@ services:
     depends_on:
       mysql_db:
         condition: service_healthy
+      redis_db:
+        condition: service_healthy
       eureka-server:
         condition: service_started
       config-server:
@@ -117,6 +134,8 @@ services:
         condition: service_started
       config-server:
         condition: service_healthy
+      redis_db:
+        condition: service_healthy
     networks:
       - microservices
     environment:
@@ -125,9 +144,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_db:3306/tododb
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql
+      - SPRING_DATA_REDIS_HOST=redis_db
+      - SPRING_DATA_REDIS_PORT=6379
+
 
 volumes:
   db_data:
+  redis_data:
 
 networks:
   microservices:
