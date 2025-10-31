@@ -27,7 +27,9 @@ Este proyecto implementa una arquitectura de microservicios que incluye:
 - **Spring Cloud 2025.0.0**
 - **Spring Security OAuth2**
 - **Spring Data JPA**
+- **Spring Data Redis**
 - **MySQL Database**
+- **Redis Database** (Caching)
 - **Resilience4j** (Circuit Breaker, Retry)
 - **Netflix Eureka** (Service Discovery)
 - **Spring Cloud Gateway**
@@ -69,6 +71,7 @@ docker-compose up --build
 ```
 Esto iniciará todos los servicios automáticamente:
 - MySQL Database (puerto 3307)
+- Redis Database (puerto 6379)
 - Config Server (puerto 8888)
 - OAuth2 Server (puerto 9000)
 - Eureka Server (puerto 8761)
@@ -198,6 +201,7 @@ ng serve
 - **Resource Server** en servicios backend
 - **CORS** configurado en API Gateway
 - **Circuit Breaker** con Resilience4j en ToDo Service
+- **Redis Caching** para mejorar rendimiento en ToDo Service
 - **Service Discovery** seguro con Eureka
 
 ## 🔄 Circuit Breaker y Resiliencia
